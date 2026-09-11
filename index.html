@@ -5,32 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>House Viewing Inspector</title>
     <style>
-        body { font-family: -apple-system, sans-serif; background: #fff; color: #333; margin: 0; padding: 16px; padding-bottom: 40px;}
-        h1, h2 { margin: 0 0 8px 0; font-size: 1.2rem; }
-        .sub-header { color: #666; font-size: 0.9rem; margin-bottom: 24px; }
-        label { font-weight: bold; font-size: 0.9rem; display: block; margin-top: 12px; }
-        input[type="text"], input[type="number"], input[type="date"], select, textarea { 
-            width: 100%; box-sizing: border-box; padding: 10px; margin-top: 4px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; font-size: 1rem;
+        body { font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif; padding: 16px; max-width: 800px; margin: 0 auto; color: #111; line-height: 1.4; }
+        h1 { font-size: 22px; margin: 0 0 4px 0; }
+        .sub-header { font-size: 14px; color: #555; margin-bottom: 24px; }
+        
+        .grid-2 { display: flex; gap: 16px; margin-bottom: 16px; }
+        .grid-2 > div { flex: 1; }
+        
+        label { display: block; font-weight: bold; margin-bottom: 6px; font-size: 14px; margin-top: 16px; }
+        
+        input[type="text"], input[type="number"], input[type="date"], select, textarea {
+            width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-family: inherit; font-size: 14px; background: #fafafa;
         }
-        textarea { min-height: 60px; resize: vertical; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-        .score-display { text-align: center; font-size: 2.5rem; font-weight: bold; margin: 20px 0; }
-        .score-sub { text-align: center; color: #666; font-size: 0.85rem; margin-bottom: 24px; }
+        textarea { resize: vertical; min-height: 70px; }
         
-        .category-block { border-bottom: 1px solid #eee; padding-bottom: 16px; margin-bottom: 16px; }
-        .cat-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
-        .cat-info { flex: 1; }
-        .cat-title { font-weight: bold; font-size: 1rem; }
-        .cat-desc { font-size: 0.85rem; color: #666; margin-top: 2px; }
-        .cat-header select { width: 160px; margin-top: 0; }
+        .score-section { text-align: center; margin: 32px 0; }
+        .score-value { font-size: 36px; font-weight: bold; margin-bottom: 4px; }
+        .score-desc { font-size: 13px; color: #555; }
         
-        .file-input { margin-top: 8px; font-size: 0.85rem; }
-        .gallery { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+        .category-row { border-bottom: 1px solid #eee; padding: 16px 0; }
+        .cat-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+        .cat-info { flex: 1; padding-right: 16px; }
+        .cat-title { font-weight: bold; font-size: 14px; }
+        .cat-desc { font-size: 12px; color: #666; margin-top: 4px; }
+        .cat-select { width: 160px; padding: 8px; font-size: 14px; border: 1px solid #ddd; border-radius: 4px; }
+        
+        /* New Notes and Photos styling added cleanly to the original layout */
+        .cat-extras { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+        .cat-extras textarea { min-height: 50px; background: #fff; border: 1px dashed #ccc; padding: 8px; }
+        .cat-extras input[type="file"] { font-size: 12px; padding: 4px 0; border: none; background: transparent; }
+        .gallery { display: flex; gap: 8px; flex-wrap: wrap; }
         .gallery img { width: 60px; height: 60px; object-fit: cover; border-radius: 4px; border: 1px solid #ccc; }
         
-        .footer-btns { display: flex; justify-content: space-between; margin-top: 40px; }
-        .btn-clear { background: none; border: none; color: #d32f2f; font-weight: bold; cursor: pointer; }
-        .btn-export { background: none; border: none; color: #ccc; font-weight: bold; }
+        .question-label { font-weight: normal; font-size: 14px; margin-top: 20px; display: block; margin-bottom: 8px;}
+        
+        .footer-buttons { display: flex; justify-content: space-between; margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; padding-bottom: 40px; }
+        .btn-export { color: #ccc; background: none; border: none; font-weight: bold; font-size: 14px; cursor: default; }
+        .btn-clear { color: #000; background: none; border: none; font-weight: bold; font-size: 14px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -52,22 +63,23 @@
     <label>Overall notes</label>
     <textarea placeholder="First impression, location, seller/agent comments..."></textarea>
 
-    <h2>Score</h2>
-    <div class="score-display"><span id="total-score">0</span>/100</div>
-    <div class="score-sub">Rate each item 0-5. Score is calculated automatically.</div>
+    <div class="score-section">
+        <div class="score-value"><span id="score">0</span>/100</div>
+        <div class="score-desc">Rate each item 0-5. Score is calculated automatically.</div>
+    </div>
 
     <div id="categories-container"></div>
 
-    <h2 style="margin-top: 32px;">Questions & due diligence</h2>
+    <h2 style="font-size: 18px; margin-top: 40px; border-bottom: 1px solid #eee; padding-bottom: 8px;">Questions & due diligence</h2>
     <div id="questions-container"></div>
 
     <label>Agent answers / follow-ups</label>
     <textarea placeholder="Record answers, names, documents promised, etc."></textarea>
 
-    <label>Overall Photos</label>
-    <div style="font-size: 0.85rem; color:#666; margin-bottom: 4px;">Photos are stored locally on this device.</div>
-    <input type="file" multiple onchange="handlePhotos(this, 'overall')">
-    <div class="gallery" id="gallery-overall"></div>
+    <label>Photos</label>
+    <input type="file" multiple onchange="handlePhotos(this, 'main')">
+    <div style="font-size: 12px; color: #666; margin-top: 4px;">Photos are stored locally on this device. Take photos of rooms, garden, roof, meter/boiler, electrics, parking and any defects.</div>
+    <div class="gallery" id="gallery-main" style="margin-top: 8px;"></div>
 
     <label>Decision</label>
     <select>
@@ -80,7 +92,7 @@
     <label>Offer / negotiation notes</label>
     <textarea placeholder="Target offer, evidence, conditions, timing..."></textarea>
 
-    <div class="footer-btns">
+    <div class="footer-buttons">
         <button class="btn-export">Export inspection</button>
         <button class="btn-clear" onclick="window.location.reload()">Clear saved data</button>
     </div>
@@ -124,14 +136,14 @@
 
         const catContainer = document.getElementById('categories-container');
         categories.forEach(cat => {
-            const html = `
-                <div class="category-block">
-                    <div class="cat-header">
+            catContainer.insertAdjacentHTML('beforeend', `
+                <div class="category-row">
+                    <div class="cat-top">
                         <div class="cat-info">
                             <div class="cat-title">${cat.title}</div>
                             <div class="cat-desc">${cat.desc}</div>
                         </div>
-                        <select class="score-select" onchange="calculateScore()">
+                        <select class="cat-select" onchange="calcScore()">
                             <option value="0">0 - unknown/bad</option>
                             <option value="1">1</option>
                             <option value="2">2</option>
@@ -140,30 +152,27 @@
                             <option value="5">5 - excellent</option>
                         </select>
                     </div>
-                    <textarea placeholder="Notes for ${cat.title}..."></textarea>
-                    <input type="file" class="file-input" accept="image/*" multiple onchange="handlePhotos(this, '${cat.id}')">
-                    <div class="gallery" id="gallery-${cat.id}"></div>
+                    <div class="cat-extras">
+                        <textarea placeholder="${cat.title} notes..."></textarea>
+                        <input type="file" accept="image/*" multiple onchange="handlePhotos(this, '${cat.id}')">
+                        <div class="gallery" id="gallery-${cat.id}"></div>
+                    </div>
                 </div>
-            `;
-            catContainer.insertAdjacentHTML('beforeend', html);
+            `);
         });
 
         const qContainer = document.getElementById('questions-container');
         questions.forEach(q => {
-            const html = `
-                <label style="font-weight:normal; margin-bottom:4px;">${q}</label>
+            qContainer.insertAdjacentHTML('beforeend', `
+                <label class="question-label">${q}</label>
                 <textarea placeholder="Answer / notes"></textarea>
-            `;
-            qContainer.insertAdjacentHTML('beforeend', html);
+            `);
         });
 
-        function calculateScore() {
-            const selects = document.querySelectorAll('.score-select');
+        function calcScore() {
             let total = 0;
-            selects.forEach(sel => total += parseInt(sel.value));
-            // 15 items * 5 max score = 75. Scale to 100.
-            const scaledScore = Math.round((total / 75) * 100);
-            document.getElementById('total-score').innerText = scaledScore;
+            document.querySelectorAll('.cat-select').forEach(sel => total += parseInt(sel.value));
+            document.getElementById('score').innerText = Math.round((total / 75) * 100);
         }
 
         function handlePhotos(input, id) {

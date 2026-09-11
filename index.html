@@ -8,18 +8,15 @@
         body { font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif; padding: 16px; max-width: 800px; margin: 0 auto; color: #111; line-height: 1.4; }
         h1 { font-size: 22px; margin: 0 0 8px 0; }
         
-        /* Editable Address Header */
-        .address-input { width: 100%; font-size: 15px; color: #555; padding: 8px 12px; margin-bottom: 24px; border: 1px dashed #ccc; border-radius: 4px; background: #fafafa; box-sizing: border-box; }
-        .address-input:focus { border-style: solid; border-color: #007AFF; outline: none; }
+        .address-input { width: 100%; font-size: 16px; font-weight: bold; padding: 12px; margin-bottom: 24px; border: 1px solid #ccc; border-radius: 8px; background: #fafafa; box-sizing: border-box; }
+        .address-input:focus { border-color: #007AFF; outline: none; }
         
-        /* Mobile-First Grid */
         .grid-2 { display: flex; flex-direction: column; gap: 16px; margin-bottom: 16px; }
         @media (min-width: 600px) { .grid-2 { flex-direction: row; } }
         .grid-2 > div { flex: 1; }
         
         label { display: block; font-weight: bold; margin-bottom: 6px; font-size: 14px; margin-top: 16px; }
         
-        /* 16px font prevents iPhone auto-zoom on focus */
         input[type="text"], input[type="number"], input[type="date"], select, textarea {
             width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 16px; background: #fafafa; appearance: none;
         }
@@ -47,31 +44,38 @@
         .gallery { display: flex; gap: 8px; flex-wrap: wrap; }
         .gallery img { width: 70px; height: 70px; object-fit: cover; border-radius: 6px; border: 1px solid #ccc; }
         
-        .question-label { font-weight: 600; font-size: 15px; margin-top: 24px; display: block; margin-bottom: 8px; line-height: 1.3;}
+        .question-label { font-weight: 600; font-size: 15px; margin-top: 24px; display: block; margin-bottom: 8px; line-height: 1.3; }
         
-        .footer-buttons { display: flex; justify-content: space-between; margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; padding-bottom: 40px; }
-        .btn-export { color: #ccc; background: none; border: none; font-weight: bold; font-size: 16px; cursor: default; padding: 12px 0; }
+        .footer-buttons { display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; padding-bottom: 40px; gap: 12px; }
+        .btn-export { background: #007AFF; color: white; border: none; padding: 12px 20px; font-weight: bold; font-size: 16px; border-radius: 8px; cursor: pointer; flex: 1; }
         .btn-clear { color: #d32f2f; background: none; border: none; font-weight: bold; font-size: 16px; cursor: pointer; padding: 12px 0; }
+
+        @media print {
+            body { padding: 0; background: #fff; color: #000; }
+            .footer-buttons, input[type="file"], .btn-export, .btn-clear { display: none !important; }
+            input, textarea, select { border: none; background: transparent; padding: 0; font-size: 14px; }
+            textarea { resize: none; }
+        }
     </style>
 </head>
 <body>
 
     <h1>House Viewing Inspector</h1>
-    <input type="text" class="address-input" value="22 Tonstall Road, Epsom KT19 9DP • Viewing 12 Sep 2026 10:45">
+    <input type="text" class="address-input" id="prop-address" value="22 Tonstall Road, Epsom KT19 9DP • Viewing 12 Sep 2026 10:45">
 
     <div class="grid-2">
         <div>
             <label>Asking price</label>
-            <input type="number" value="445000">
+            <input type="number" id="prop-price" value="445000">
         </div>
         <div>
             <label>Viewing date</label>
-            <input type="date" value="2026-09-12">
+            <input type="date" id="prop-date" value="2026-09-12">
         </div>
     </div>
 
     <label>Overall notes</label>
-    <textarea placeholder="First impression, location, seller/agent comments..."></textarea>
+    <textarea id="prop-notes" placeholder="First impression, location, seller/agent comments..."></textarea>
 
     <div class="score-section">
         <div class="score-value"><span id="score">0</span>/100</div>
@@ -84,15 +88,15 @@
     <div id="questions-container"></div>
 
     <label>Agent answers / follow-ups</label>
-    <textarea placeholder="Record answers, names, documents promised, etc."></textarea>
+    <textarea id="agent-notes" placeholder="Record answers, names, documents promised, etc."></textarea>
 
     <label>Photos</label>
-    <input type="file" multiple onchange="handlePhotos(this, 'main')">
-    <div style="font-size: 13px; color: #666; margin-top: 4px;">Photos are stored locally on this device. Take photos of rooms, garden, roof, meter/boiler, electrics, parking and any defects.</div>
+    <input type="file" accept="image/*" multiple onchange="handlePhotos(this, 'main')">
+    <div style="font-size: 13px; color: #666; margin-top: 4px;">Photos are stored locally on this device.</div>
     <div class="gallery" id="gallery-main" style="margin-top: 12px;"></div>
 
     <label>Decision</label>
-    <select>
+    <select id="prop-decision">
         <option>Select...</option>
         <option>Make Offer</option>
         <option>Shortlist</option>
@@ -100,11 +104,11 @@
     </select>
 
     <label>Offer / negotiation notes</label>
-    <textarea placeholder="Target offer, evidence, conditions, timing..."></textarea>
+    <textarea id="offer-notes" placeholder="Target offer, evidence, conditions, timing..."></textarea>
 
     <div class="footer-buttons">
-        <button class="btn-export">Export inspection</button>
-        <button class="btn-clear" onclick="window.location.reload()">Clear saved data</button>
+        <button class="btn-export" onclick="exportPDF()">Export PDF Report</button>
+        <button class="btn-clear" onclick="clearData()">Clear saved data</button>
     </div>
 
     <script>
@@ -145,7 +149,7 @@
         ];
 
         const catContainer = document.getElementById('categories-container');
-        categories.forEach(cat => {
+        categories.forEach((cat, index) => {
             catContainer.insertAdjacentHTML('beforeend', `
                 <div class="category-row">
                     <div class="cat-top">
@@ -153,7 +157,7 @@
                             <div class="cat-title">${cat.title}</div>
                             <div class="cat-desc">${cat.desc}</div>
                         </div>
-                        <select class="cat-select" onchange="calcScore()">
+                        <select class="cat-select" id="score-${index}" onchange="calcScore(); saveData();">
                             <option value="0">0 - unknown/bad</option>
                             <option value="1">1</option>
                             <option value="2">2</option>
@@ -163,7 +167,7 @@
                         </select>
                     </div>
                     <div class="cat-extras">
-                        <textarea placeholder="${cat.title} notes..."></textarea>
+                        <textarea id="note-${index}" placeholder="${cat.title} notes..." oninput="saveData()"></textarea>
                         <input type="file" accept="image/*" multiple onchange="handlePhotos(this, '${cat.id}')">
                         <div class="gallery" id="gallery-${cat.id}"></div>
                     </div>
@@ -172,11 +176,17 @@
         });
 
         const qContainer = document.getElementById('questions-container');
-        questions.forEach(q => {
+        questions.forEach((q, index) => {
             qContainer.insertAdjacentHTML('beforeend', `
                 <label class="question-label">${q}</label>
-                <textarea placeholder="Answer / notes"></textarea>
+                <textarea id="q-note-${index}" placeholder="Answer / notes" oninput="saveData()"></textarea>
             `);
+        });
+
+        // Event listeners for basic fields
+        ['prop-address', 'prop-price', 'prop-date', 'prop-notes', 'agent-notes', 'prop-decision', 'offer-notes'].forEach(id => {
+            document.getElementById(id).addEventListener('input', saveData);
+            document.getElementById(id).addEventListener('change', saveData);
         });
 
         function calcScore() {
@@ -189,13 +199,104 @@
             const gallery = document.getElementById(`gallery-${id}`);
             Array.from(input.files).forEach(file => {
                 if (file.type.startsWith('image/')) {
-                    const img = document.createElement('img');
-                    img.src = URL.createObjectURL(file);
-                    img.onload = () => URL.revokeObjectURL(img.src);
-                    gallery.appendChild(img);
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        gallery.appendChild(img);
+                        saveData();
+                    }
+                    reader.readAsDataURL(file);
                 }
             });
         }
+
+        function exportPDF() {
+            window.print();
+        }
+
+        function saveData() {
+            const data = {
+                address: document.getElementById('prop-address').value,
+                price: document.getElementById('prop-price').value,
+                date: document.getElementById('prop-date').value,
+                notes: document.getElementById('prop-notes').value,
+                agentNotes: document.getElementById('agent-notes').value,
+                decision: document.getElementById('prop-decision').value,
+                offerNotes: document.getElementById('offer-notes').value,
+                scores: {},
+                catNotes: {},
+                qNotes: {},
+                galleries: {}
+            };
+
+            categories.forEach((cat, index) => {
+                data.scores[index] = document.getElementById(`score-${index}`).value;
+                data.catNotes[index] = document.getElementById(`note-${index}`).value;
+                data.galleries[cat.id] = document.getElementById(`gallery-${cat.id}`).innerHTML;
+            });
+
+            questions.forEach((q, index) => {
+                data.qNotes[index] = document.getElementById(`q-note-${index}`).value;
+            });
+
+            data.galleries['main'] = document.getElementById('gallery-main').innerHTML;
+
+            localStorage.setItem('inspection_data', JSON.stringify(data));
+        }
+
+        function loadData() {
+            const saved = localStorage.getItem('inspection_data');
+            if (!saved) return;
+            const data = JSON.parse(saved);
+
+            if(data.address) document.getElementById('prop-address').value = data.address;
+            if(data.price) document.getElementById('prop-price').value = data.price;
+            if(data.date) document.getElementById('prop-date').value = data.date;
+            if(data.notes) document.getElementById('prop-notes').value = data.notes;
+            if(data.agentNotes) document.getElementById('agent-notes').value = data.agentNotes;
+            if(data.decision) document.getElementById('prop-decision').value = data.decision;
+            if(data.offerNotes) document.getElementById('offer-notes').value = data.offerNotes;
+
+            if(data.scores) {
+                Object.keys(data.scores).forEach(i => {
+                    const el = document.getElementById(`score-${i}`);
+                    if(el) el.value = data.scores[i];
+                });
+            }
+
+            if(data.catNotes) {
+                Object.keys(data.catNotes).forEach(i => {
+                    const el = document.getElementById(`note-${i}`);
+                    if(el) el.value = data.catNotes[i];
+                });
+            }
+
+            if(data.qNotes) {
+                Object.keys(data.qNotes).forEach(i => {
+                    const el = document.getElementById(`q-note-${i}`);
+                    if(el) el.value = data.qNotes[i];
+                });
+            }
+
+            if(data.galleries) {
+                Object.keys(data.galleries).forEach(id => {
+                    const g = document.getElementById(`gallery-${id}`);
+                    if(g) g.innerHTML = data.galleries[id];
+                });
+            }
+
+            calcScore();
+        }
+
+        function clearData() {
+            if(confirm("Are you sure you want to clear all data and photos?")) {
+                localStorage.removeItem('inspection_data');
+                window.location.reload();
+            }
+        }
+
+        window.onload = loadData;
     </script>
 </body>
 </html>

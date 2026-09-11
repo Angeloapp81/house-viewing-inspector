@@ -2,52 +2,62 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>House Viewing Inspector</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif; padding: 16px; max-width: 800px; margin: 0 auto; color: #111; line-height: 1.4; }
-        h1 { font-size: 22px; margin: 0 0 4px 0; }
-        .sub-header { font-size: 14px; color: #555; margin-bottom: 24px; }
+        h1 { font-size: 22px; margin: 0 0 8px 0; }
         
-        .grid-2 { display: flex; gap: 16px; margin-bottom: 16px; }
+        /* Editable Address Header */
+        .address-input { width: 100%; font-size: 15px; color: #555; padding: 8px 12px; margin-bottom: 24px; border: 1px dashed #ccc; border-radius: 4px; background: #fafafa; box-sizing: border-box; }
+        .address-input:focus { border-style: solid; border-color: #007AFF; outline: none; }
+        
+        /* Mobile-First Grid */
+        .grid-2 { display: flex; flex-direction: column; gap: 16px; margin-bottom: 16px; }
+        @media (min-width: 600px) { .grid-2 { flex-direction: row; } }
         .grid-2 > div { flex: 1; }
         
         label { display: block; font-weight: bold; margin-bottom: 6px; font-size: 14px; margin-top: 16px; }
         
+        /* 16px font prevents iPhone auto-zoom on focus */
         input[type="text"], input[type="number"], input[type="date"], select, textarea {
-            width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-family: inherit; font-size: 14px; background: #fafafa;
+            width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 16px; background: #fafafa; appearance: none;
         }
-        textarea { resize: vertical; min-height: 70px; }
+        textarea { resize: vertical; min-height: 80px; }
         
         .score-section { text-align: center; margin: 32px 0; }
-        .score-value { font-size: 36px; font-weight: bold; margin-bottom: 4px; }
+        .score-value { font-size: 42px; font-weight: bold; margin-bottom: 4px; }
         .score-desc { font-size: 13px; color: #555; }
         
-        .category-row { border-bottom: 1px solid #eee; padding: 16px 0; }
-        .cat-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
-        .cat-info { flex: 1; padding-right: 16px; }
-        .cat-title { font-weight: bold; font-size: 14px; }
-        .cat-desc { font-size: 12px; color: #666; margin-top: 4px; }
-        .cat-select { width: 160px; padding: 8px; font-size: 14px; border: 1px solid #ddd; border-radius: 4px; }
+        .category-row { border-bottom: 1px solid #eee; padding: 20px 0; }
+        .cat-top { display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px; }
+        @media (min-width: 600px) { .cat-top { flex-direction: row; align-items: flex-start; justify-content: space-between; } }
         
-        /* New Notes and Photos styling added cleanly to the original layout */
-        .cat-extras { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
-        .cat-extras textarea { min-height: 50px; background: #fff; border: 1px dashed #ccc; padding: 8px; }
-        .cat-extras input[type="file"] { font-size: 12px; padding: 4px 0; border: none; background: transparent; }
+        .cat-info { flex: 1; }
+        .cat-title { font-weight: bold; font-size: 16px; }
+        .cat-desc { font-size: 13px; color: #666; margin-top: 4px; }
+        
+        .cat-select { width: 100%; height: 44px; }
+        @media (min-width: 600px) { .cat-select { width: 180px; } }
+        
+        .cat-extras { display: flex; flex-direction: column; gap: 12px; }
+        .cat-extras textarea { min-height: 60px; background: #fff; border: 1px solid #e5e5e5; }
+        .cat-extras input[type="file"] { font-size: 14px; padding: 8px 0; border: none; background: transparent; }
+        
         .gallery { display: flex; gap: 8px; flex-wrap: wrap; }
-        .gallery img { width: 60px; height: 60px; object-fit: cover; border-radius: 4px; border: 1px solid #ccc; }
+        .gallery img { width: 70px; height: 70px; object-fit: cover; border-radius: 6px; border: 1px solid #ccc; }
         
-        .question-label { font-weight: normal; font-size: 14px; margin-top: 20px; display: block; margin-bottom: 8px;}
+        .question-label { font-weight: 600; font-size: 15px; margin-top: 24px; display: block; margin-bottom: 8px; line-height: 1.3;}
         
         .footer-buttons { display: flex; justify-content: space-between; margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; padding-bottom: 40px; }
-        .btn-export { color: #ccc; background: none; border: none; font-weight: bold; font-size: 14px; cursor: default; }
-        .btn-clear { color: #000; background: none; border: none; font-weight: bold; font-size: 14px; cursor: pointer; }
+        .btn-export { color: #ccc; background: none; border: none; font-weight: bold; font-size: 16px; cursor: default; padding: 12px 0; }
+        .btn-clear { color: #d32f2f; background: none; border: none; font-weight: bold; font-size: 16px; cursor: pointer; padding: 12px 0; }
     </style>
 </head>
 <body>
 
     <h1>House Viewing Inspector</h1>
-    <div class="sub-header">22 Tonstall Road, Epsom KT19 9DP • Viewing 12 Sep 2026 10:45</div>
+    <input type="text" class="address-input" value="22 Tonstall Road, Epsom KT19 9DP • Viewing 12 Sep 2026 10:45">
 
     <div class="grid-2">
         <div>
@@ -70,7 +80,7 @@
 
     <div id="categories-container"></div>
 
-    <h2 style="font-size: 18px; margin-top: 40px; border-bottom: 1px solid #eee; padding-bottom: 8px;">Questions & due diligence</h2>
+    <h2 style="font-size: 20px; margin-top: 48px; border-bottom: 2px solid #eee; padding-bottom: 8px;">Questions & due diligence</h2>
     <div id="questions-container"></div>
 
     <label>Agent answers / follow-ups</label>
@@ -78,8 +88,8 @@
 
     <label>Photos</label>
     <input type="file" multiple onchange="handlePhotos(this, 'main')">
-    <div style="font-size: 12px; color: #666; margin-top: 4px;">Photos are stored locally on this device. Take photos of rooms, garden, roof, meter/boiler, electrics, parking and any defects.</div>
-    <div class="gallery" id="gallery-main" style="margin-top: 8px;"></div>
+    <div style="font-size: 13px; color: #666; margin-top: 4px;">Photos are stored locally on this device. Take photos of rooms, garden, roof, meter/boiler, electrics, parking and any defects.</div>
+    <div class="gallery" id="gallery-main" style="margin-top: 12px;"></div>
 
     <label>Decision</label>
     <select>

@@ -41,7 +41,6 @@
         .cat-extras textarea { min-height: 60px; background: #fff; border: 1px solid #e5e5e5; }
         .cat-extras input[type="file"] { font-size: 14px; padding: 8px 0; border: none; background: transparent; }
         
-        /* Enlarged Image Gallery Size */
         .gallery { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
         .gallery img { width: 130px; height: 130px; object-fit: cover; border-radius: 8px; border: 1px solid #ccc; }
         
@@ -57,7 +56,6 @@
             input, select { border: none; background: transparent; padding: 0; font-size: 14px; appearance: none; }
             textarea { border: none; background: transparent; padding: 0; resize: none; }
             .address-input { border: none; background: transparent; padding: 0; font-size: 18px; }
-            /* Make pictures even larger and clearer in printed PDF */
             .gallery img { width: 150px; height: 150px; border: 1px solid #999; }
         }
     </style>
@@ -117,21 +115,30 @@
 
     <script>
         const categories = [
+            // General House Systems
             { id: 'loc', title: 'Location / street', desc: 'Is the immediate area quiet, safe and acceptable for 5+ years?' },
-            { id: 'gar', title: 'Garden', desc: 'Condition, privacy, orientation, drainage, boundaries, usable space.' },
-            { id: 'par', title: 'Parking', desc: 'Dedicated/legal parking? Restrictions? Easy access?' },
-            { id: 'roo', title: 'Roof', desc: 'Age, visible defects, tiles, gutters, loft evidence.' },
+            { id: 'roo', title: 'Roof & Exterior', desc: 'Age, visible defects, tiles, gutters, loft evidence.' },
             { id: 'win', title: 'Windows / doors', desc: 'Condition, glazing, drafts, locks, signs of damp.' },
             { id: 'dam', title: 'Damp / mould', desc: 'Walls, corners, ceilings, behind furniture, smells.' },
             { id: 'hea', title: 'Heating / boiler', desc: 'Boiler age/model, service history, heating performance.' },
             { id: 'ele', title: 'Electrics', desc: 'Consumer unit, RCDs, sockets, visible DIY or outdated wiring.' },
             { id: 'plu', title: 'Plumbing', desc: 'Pressure, leaks, taps, toilets, hot water.' },
             { id: 'str', title: 'Structure', desc: 'Cracks, movement, extensions, floors, ceilings.' },
-            { id: 'kit', title: 'Kitchen / bathroom', desc: 'Condition and likely replacement cost.' },
             { id: 'ene', title: 'Energy / insulation', desc: 'EPC, loft insulation, glazing and heating efficiency.' },
             { id: 'lea', title: 'Lease / freehold', desc: 'Tenure, service charge, ground rent, restrictions.' },
             { id: 'nei', title: 'Neighbours / noise', desc: 'Party walls, traffic, trains, commercial noise.' },
-            { id: 'res', title: 'Resale', desc: 'Would the property remain attractive to another buyer?' }
+            { id: 'res', title: 'Resale', desc: 'Would the property remain attractive to another buyer?' },
+            
+            // Floor Plan Specific Rooms
+            { id: 'rec', title: 'Ground Floor: Reception Room (16\'11" x 11\')', desc: 'Space, natural light, flooring, sockets, fireplace/radiators.' },
+            { id: 'din', title: 'Ground Floor: Dining Room (11\' x 8\'2")', desc: 'Access to garden, flow, light, wall condition.' },
+            { id: 'kit', title: 'Ground Floor: Kitchen (11\'1" x 7\'5")', desc: 'Units, appliances, worktops, sink plumbing, extraction.' },
+            { id: 'bed1', title: 'First Floor: Front Bedroom (14\'7" x 11\')', desc: 'Size, wardrobe space, window condition, flooring.' },
+            { id: 'bed2', title: 'First Floor: Rear Bedroom (11\'5" x 10\'10")', desc: 'View, natural light, wall cracks, radiator.' },
+            { id: 'bath', title: 'First Floor: Bathroom / Shower Room', desc: 'Shower pressure, sanitaryware, tiling, ventilation, sealant.' },
+            { id: 'summer', title: 'Outbuilding: Summer House / Office (13\'6" x 12\'9")', desc: 'Structure, electricity, insulation, usable workspace condition.' },
+            { id: 'storage', title: 'Outbuilding: Storage Area (13\'6" x 5\'9")', desc: 'Dryness, security, structural integrity, access doors.' },
+            { id: 'gar', title: 'Garden & Parking', desc: 'Condition, privacy, orientation, drainage, dedicated parking space.' }
         ];
 
         const questions = [
@@ -194,8 +201,11 @@
 
         function calcScore() {
             let total = 0;
+            const count = categories.length;
             document.querySelectorAll('.cat-select').forEach(sel => total += parseInt(sel.value));
-            document.getElementById('score').innerText = Math.round((total / 75) * 100);
+            // Automatically scales based on total number of categories (max 5 each)
+            const maxPossible = count * 5;
+            document.getElementById('score').innerText = Math.round((total / maxPossible) * 100);
         }
 
         function handlePhotos(input, id) {

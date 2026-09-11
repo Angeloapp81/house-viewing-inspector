@@ -46,13 +46,18 @@
         
         .question-label { font-weight: 600; font-size: 15px; margin-top: 24px; display: block; margin-bottom: 8px; line-height: 1.3; }
         
-        .footer-buttons { display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; padding-bottom: 40px; gap: 12px; }
+        .footer-buttons { display: flex; flex-direction: column; gap: 12px; margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; padding-bottom: 40px; }
+        @media (min-width: 600px) { .footer-buttons { flex-direction: row; justify-content: space-between; align-items: center; } }
+        
+        .btn-save { background: #34C759; color: white; border: none; padding: 14px 20px; font-weight: bold; font-size: 16px; border-radius: 8px; cursor: pointer; flex: 1; text-align: center; }
         .btn-export { background: #007AFF; color: white; border: none; padding: 14px 20px; font-weight: bold; font-size: 16px; border-radius: 8px; cursor: pointer; flex: 1; text-align: center; }
-        .btn-clear { color: #d32f2f; background: none; border: none; font-weight: bold; font-size: 16px; cursor: pointer; padding: 12px 0; }
+        .btn-clear { color: #d32f2f; background: none; border: none; font-weight: bold; font-size: 16px; cursor: pointer; padding: 12px 0; text-align: center; }
+
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 12px 24px; border-radius: 20px; font-size: 15px; display: none; z-index: 1000; }
 
         @media print {
             body { padding: 0; background: #fff; color: #000; }
-            .footer-buttons, input[type="file"], .btn-export, .btn-clear { display: none !important; }
+            .footer-buttons, input[type="file"], .btn-save, .btn-export, .btn-clear, .toast { display: none !important; }
             input, select { border: none; background: transparent; padding: 0; font-size: 14px; appearance: none; }
             textarea { border: none; background: transparent; padding: 0; resize: none; }
             .address-input { border: none; background: transparent; padding: 0; font-size: 18px; }
@@ -109,13 +114,15 @@
     <textarea id="offer-notes" placeholder="Target offer, evidence, conditions, timing..."></textarea>
 
     <div class="footer-buttons">
+        <button class="btn-save" onclick="manualSave()">Save Progress</button>
         <button class="btn-export" onclick="window.print()">Export PDF Report</button>
         <button class="btn-clear" onclick="clearData()">Clear saved data</button>
     </div>
 
+    <div id="toast" class="toast">Progress saved successfully!</div>
+
     <script>
         const categories = [
-            // General House Systems
             { id: 'loc', title: 'Location / street', desc: 'Is the immediate area quiet, safe and acceptable for 5+ years?' },
             { id: 'roo', title: 'Roof & Exterior', desc: 'Age, visible defects, tiles, gutters, loft evidence.' },
             { id: 'win', title: 'Windows / doors', desc: 'Condition, glazing, drafts, locks, signs of damp.' },
@@ -128,8 +135,6 @@
             { id: 'lea', title: 'Lease / freehold', desc: 'Tenure, service charge, ground rent, restrictions.' },
             { id: 'nei', title: 'Neighbours / noise', desc: 'Party walls, traffic, trains, commercial noise.' },
             { id: 'res', title: 'Resale', desc: 'Would the property remain attractive to another buyer?' },
-            
-            // Floor Plan Specific Rooms
             { id: 'rec', title: 'Ground Floor: Reception Room (16\'11" x 11\')', desc: 'Space, natural light, flooring, sockets, fireplace/radiators.' },
             { id: 'din', title: 'Ground Floor: Dining Room (11\' x 8\'2")', desc: 'Access to garden, flow, light, wall condition.' },
             { id: 'kit', title: 'Ground Floor: Kitchen (11\'1" x 7\'5")', desc: 'Units, appliances, worktops, sink plumbing, extraction.' },
@@ -203,7 +208,6 @@
             let total = 0;
             const count = categories.length;
             document.querySelectorAll('.cat-select').forEach(sel => total += parseInt(sel.value));
-            // Automatically scales based on total number of categories (max 5 each)
             const maxPossible = count * 5;
             document.getElementById('score').innerText = Math.round((total / maxPossible) * 100);
         }
@@ -222,6 +226,15 @@
                     reader.readAsDataURL(file);
                 }
             });
+        }
+
+        function manualSave() {
+            saveData();
+            const toast = document.getElementById('toast');
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 2000);
         }
 
         function saveData() {

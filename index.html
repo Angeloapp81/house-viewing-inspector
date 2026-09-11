@@ -2,193 +2,172 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>House Viewing Inspector</title>
     <style>
-        :root { 
-            --ios-blue: #007AFF; 
-            --bg: #F2F2F7; 
-            --card: #FFFFFF; 
-            --text: #1C1C1E; 
-            --sub-text: #8E8E93; 
-            --border: #E5E5EA; 
+        body { font-family: -apple-system, sans-serif; background: #fff; color: #333; margin: 0; padding: 16px; padding-bottom: 40px;}
+        h1, h2 { margin: 0 0 8px 0; font-size: 1.2rem; }
+        .sub-header { color: #666; font-size: 0.9rem; margin-bottom: 24px; }
+        label { font-weight: bold; font-size: 0.9rem; display: block; margin-top: 12px; }
+        input[type="text"], input[type="number"], input[type="date"], select, textarea { 
+            width: 100%; box-sizing: border-box; padding: 10px; margin-top: 4px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; font-size: 1rem;
         }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            background: var(--bg); 
-            color: var(--text); 
-            padding: 20px 16px 80px 16px; 
-            margin: 0; 
-        }
-        h1 { 
-            text-align: center; 
-            font-size: 1.8rem; 
-            font-weight: 700; 
-            margin-bottom: 24px; 
-        }
-        .card { 
-            background: var(--card); 
-            border-radius: 16px; 
-            padding: 20px; 
-            margin-bottom: 20px; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03); 
-        }
-        .card h2 { 
-            font-size: 1.3rem; 
-            margin: 0 0 20px 0; 
-            font-weight: 600; 
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 12px;
-        }
-        .label { 
-            font-size: 0.8rem; 
-            font-weight: 600; 
-            color: var(--sub-text); 
-            text-transform: uppercase; 
-            letter-spacing: 0.5px; 
-            margin-bottom: 10px; 
-            display: block; 
-        }
+        textarea { min-height: 60px; resize: vertical; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+        .score-display { text-align: center; font-size: 2.5rem; font-weight: bold; margin: 20px 0; }
+        .score-sub { text-align: center; color: #666; font-size: 0.85rem; margin-bottom: 24px; }
         
-        /* Premium Rating Buttons */
-        .rating-bar { display: flex; gap: 8px; margin-bottom: 24px; }
-        .rate-btn { 
-            flex: 1; padding: 12px 0; border: 1px solid var(--border); 
-            background: #FAFAFA; border-radius: 10px; font-size: 1.1rem; 
-            font-weight: 600; cursor: pointer; transition: all 0.2s; color: var(--text); 
-        }
-        .rate-btn.active { 
-            background: var(--ios-blue); color: white; 
-            border-color: var(--ios-blue); transform: scale(1.05); 
-            box-shadow: 0 4px 8px rgba(0, 122, 255, 0.3);
-        }
-
-        /* Checklists */
-        .checklist { list-style: none; padding: 0; margin: 0 0 12px 0; }
-        .checklist li { 
-            display: flex; align-items: center; gap: 12px; padding: 10px 0; 
-            border-bottom: 1px solid var(--border); font-size: 1rem;
-        }
-        .checklist li:last-child { border-bottom: none; }
-        input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--ios-blue); }
+        .category-block { border-bottom: 1px solid #eee; padding-bottom: 16px; margin-bottom: 16px; }
+        .cat-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+        .cat-info { flex: 1; }
+        .cat-title { font-weight: bold; font-size: 1rem; }
+        .cat-desc { font-size: 0.85rem; color: #666; margin-top: 2px; }
+        .cat-header select { width: 160px; margin-top: 0; }
         
-        /* Add Item Input */
-        .add-row { display: flex; gap: 8px; margin-bottom: 24px; }
-        .add-row input { 
-            flex: 1; padding: 12px; border: 1px solid var(--border); 
-            border-radius: 10px; font-size: 1rem; background: #FAFAFA; 
-        }
-        .add-row input:focus { outline: none; border-color: var(--ios-blue); }
-        .add-row button { 
-            background: var(--text); color: white; border: none; 
-            padding: 0 20px; border-radius: 10px; font-weight: 600; 
-        }
-
-        /* Notes */
-        textarea { 
-            width: 100%; box-sizing: border-box; padding: 12px; 
-            border: 1px solid var(--border); border-radius: 10px; 
-            font-family: inherit; font-size: 1rem; min-height: 80px; 
-            background: #FAFAFA; margin-bottom: 24px; 
-        }
-        textarea:focus { outline: none; border-color: var(--ios-blue); }
-
-        /* Stylish Photo Upload */
-        .photo-upload-btn { 
-            display: block; background: #E5F1FF; color: var(--ios-blue); 
-            padding: 14px; border-radius: 10px; font-weight: 600; 
-            text-align: center; cursor: pointer; 
-        }
-        input[type="file"] { display: none; }
-        .gallery { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
-        .gallery img { 
-            width: calc(33.33% - 7px); aspect-ratio: 1; object-fit: cover; 
-            border-radius: 10px; border: 1px solid var(--border); 
-        }
+        .file-input { margin-top: 8px; font-size: 0.85rem; }
+        .gallery { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+        .gallery img { width: 60px; height: 60px; object-fit: cover; border-radius: 4px; border: 1px solid #ccc; }
+        
+        .footer-btns { display: flex; justify-content: space-between; margin-top: 40px; }
+        .btn-clear { background: none; border: none; color: #d32f2f; font-weight: bold; cursor: pointer; }
+        .btn-export { background: none; border: none; color: #ccc; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <h1>Inspection Report</h1>
-    <div id="app"></div>
+    <h1>House Viewing Inspector</h1>
+    <div class="sub-header">22 Tonstall Road, Epsom KT19 9DP • Viewing 12 Sep 2026 10:45</div>
+
+    <div class="grid-2">
+        <div>
+            <label>Asking price</label>
+            <input type="number" value="445000">
+        </div>
+        <div>
+            <label>Viewing date</label>
+            <input type="date" value="2026-09-12">
+        </div>
+    </div>
+
+    <label>Overall notes</label>
+    <textarea placeholder="First impression, location, seller/agent comments..."></textarea>
+
+    <h2>Score</h2>
+    <div class="score-display"><span id="total-score">0</span>/100</div>
+    <div class="score-sub">Rate each item 0-5. Score is calculated automatically.</div>
+
+    <div id="categories-container"></div>
+
+    <h2 style="margin-top: 32px;">Questions & due diligence</h2>
+    <div id="questions-container"></div>
+
+    <label>Agent answers / follow-ups</label>
+    <textarea placeholder="Record answers, names, documents promised, etc."></textarea>
+
+    <label>Overall Photos</label>
+    <div style="font-size: 0.85rem; color:#666; margin-bottom: 4px;">Photos are stored locally on this device.</div>
+    <input type="file" multiple onchange="handlePhotos(this, 'overall')">
+    <div class="gallery" id="gallery-overall"></div>
+
+    <label>Decision</label>
+    <select>
+        <option>Select...</option>
+        <option>Make Offer</option>
+        <option>Shortlist</option>
+        <option>Reject</option>
+    </select>
+
+    <label>Offer / negotiation notes</label>
+    <textarea placeholder="Target offer, evidence, conditions, timing..."></textarea>
+
+    <div class="footer-btns">
+        <button class="btn-export">Export inspection</button>
+        <button class="btn-clear" onclick="window.location.reload()">Clear saved data</button>
+    </div>
 
     <script>
         const categories = [
-            { name: "Exterior & Roof", checks: ["Check brickwork/render", "Look for missing roof tiles", "Check guttering"] },
-            { name: "Living Area", checks: ["Check window seals", "Look for damp patches", "Test light switches"] },
-            { name: "Kitchen", checks: ["Check water pressure", "Inspect under-sink plumbing", "Check appliance spaces"] },
-            { name: "Bedrooms", checks: ["Look for condensation on windows", "Check radiator valves", "Inspect built-in storage"] },
-            { name: "Bathrooms", checks: ["Flush the toilet", "Check shower pressure", "Look for mold/mildew"] },
-            { name: "Plumbing & Heating", checks: ["Check boiler age/service history", "Locate stopcock", "Check fuse box"] }
+            { id: 'loc', title: 'Location / street', desc: 'Is the immediate area quiet, safe and acceptable for 5+ years?' },
+            { id: 'gar', title: 'Garden', desc: 'Condition, privacy, orientation, drainage, boundaries, usable space.' },
+            { id: 'par', title: 'Parking', desc: 'Dedicated/legal parking? Restrictions? Easy access?' },
+            { id: 'roo', title: 'Roof', desc: 'Age, visible defects, tiles, gutters, loft evidence.' },
+            { id: 'win', title: 'Windows / doors', desc: 'Condition, glazing, drafts, locks, signs of damp.' },
+            { id: 'dam', title: 'Damp / mould', desc: 'Walls, corners, ceilings, behind furniture, smells.' },
+            { id: 'hea', title: 'Heating / boiler', desc: 'Boiler age/model, service history, heating performance.' },
+            { id: 'ele', title: 'Electrics', desc: 'Consumer unit, RCDs, sockets, visible DIY or outdated wiring.' },
+            { id: 'plu', title: 'Plumbing', desc: 'Pressure, leaks, taps, toilets, hot water.' },
+            { id: 'str', title: 'Structure', desc: 'Cracks, movement, extensions, floors, ceilings.' },
+            { id: 'kit', title: 'Kitchen / bathroom', desc: 'Condition and likely replacement cost.' },
+            { id: 'ene', title: 'Energy / insulation', desc: 'EPC, loft insulation, glazing and heating efficiency.' },
+            { id: 'lea', title: 'Lease / freehold', desc: 'Tenure, service charge, ground rent, restrictions.' },
+            { id: 'nei', title: 'Neighbours / noise', desc: 'Party walls, traffic, trains, commercial noise.' },
+            { id: 'res', title: 'Resale', desc: 'Would the property remain attractive to another buyer?' }
         ];
 
-        const app = document.getElementById('app');
+        const questions = [
+            "1. Why is the seller moving and how long has it been on the market?",
+            "2. Have there been previous offers? Why did any sale fall through?",
+            "3. How long has the seller owned it?",
+            "4. What is the exact tenure and are there any service charges/estate charges?",
+            "5. Any planned major works or disputes affecting the property?",
+            "6. Any extensions or alterations? Are planning/building-control documents available?",
+            "7. Age and service history of boiler/heating system?",
+            "8. Any history of damp, flooding, subsidence or insurance claims?",
+            "9. Roof age and any recent repairs?",
+            "10. Which fixtures/fittings are included?",
+            "11. Council tax band and approximate annual amount?",
+            "12. Typical utility costs / EPC recommendations?",
+            "13. Any parking restrictions, permits or rights?",
+            "14. Any neighbour disputes or boundary issues?",
+            "15. How quickly does the seller want to exchange/complete?"
+        ];
 
-        categories.forEach((cat, index) => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            
-            // Generate 1-5 Rating Buttons
-            let ratingHTML = '';
-            for(let i=1; i<=5; i++) {
-                ratingHTML += `<button class="rate-btn" onclick="setScore(this, ${index})">${i}</button>`;
-            }
-
-            // Generate Default Checklist
-            let checklistHTML = cat.checks.map(item => 
-                `<li><input type="checkbox"> <span>${item}</span></li>`
-            ).join('');
-
-            card.innerHTML = `
-                <h2>${cat.name}</h2>
-                
-                <span class="label">Condition Score</span>
-                <div class="rating-bar" id="rating-${index}">
-                    ${ratingHTML}
+        const catContainer = document.getElementById('categories-container');
+        categories.forEach(cat => {
+            const html = `
+                <div class="category-block">
+                    <div class="cat-header">
+                        <div class="cat-info">
+                            <div class="cat-title">${cat.title}</div>
+                            <div class="cat-desc">${cat.desc}</div>
+                        </div>
+                        <select class="score-select" onchange="calculateScore()">
+                            <option value="0">0 - unknown/bad</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5 - excellent</option>
+                        </select>
+                    </div>
+                    <textarea placeholder="Notes for ${cat.title}..."></textarea>
+                    <input type="file" class="file-input" accept="image/*" multiple onchange="handlePhotos(this, '${cat.id}')">
+                    <div class="gallery" id="gallery-${cat.id}"></div>
                 </div>
-
-                <span class="label">Checklist</span>
-                <ul class="checklist" id="list-${index}">
-                    ${checklistHTML}
-                </ul>
-                <div class="add-row">
-                    <input type="text" id="input-${index}" placeholder="Add a custom check...">
-                    <button onclick="addItem(${index})">Add</button>
-                </div>
-
-                <span class="label">Notes</span>
-                <textarea placeholder="Write your observations here..."></textarea>
-
-                <span class="label">Photos</span>
-                <label class="photo-upload-btn">
-                    + Add Photos
-                    <input type="file" accept="image/*" multiple onchange="handlePhotos(this, ${index})">
-                </label>
-                <div class="gallery" id="gallery-${index}"></div>
             `;
-            app.appendChild(card);
+            catContainer.insertAdjacentHTML('beforeend', html);
         });
 
-        // Handle Score Selection
-        function setScore(btn, index) {
-            const container = document.getElementById(`rating-${index}`);
-            const buttons = container.getElementsByClassName('rate-btn');
-            for(let b of buttons) b.classList.remove('active');
-            btn.classList.add('active');
+        const qContainer = document.getElementById('questions-container');
+        questions.forEach(q => {
+            const html = `
+                <label style="font-weight:normal; margin-bottom:4px;">${q}</label>
+                <textarea placeholder="Answer / notes"></textarea>
+            `;
+            qContainer.insertAdjacentHTML('beforeend', html);
+        });
+
+        function calculateScore() {
+            const selects = document.querySelectorAll('.score-select');
+            let total = 0;
+            selects.forEach(sel => total += parseInt(sel.value));
+            // 15 items * 5 max score = 75. Scale to 100.
+            const scaledScore = Math.round((total / 75) * 100);
+            document.getElementById('total-score').innerText = scaledScore;
         }
 
-        // Handle Custom Checklist Items
-        function addItem(index) {
-            const input = document.getElementById(`input-${index}`);
-            if (!input.value.trim()) return;
-            const ul = document.getElementById(`list-${index}`);
-            ul.insertAdjacentHTML('beforeend', `<li><input type="checkbox"> <span>${input.value}</span></li>`);
-            input.value = '';
-        }
-
-        // Handle Photo Previews
-        function handlePhotos(input, index) {
-            const gallery = document.getElementById(`gallery-${index}`);
+        function handlePhotos(input, id) {
+            const gallery = document.getElementById(`gallery-${id}`);
             Array.from(input.files).forEach(file => {
                 if (file.type.startsWith('image/')) {
                     const img = document.createElement('img');

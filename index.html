@@ -3,92 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>House Viewing Inspector</title>
+    <title>Live House Inspector</title>
     <style>
-        :root { --primary: #2563eb; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --border: #e2e8f0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 16px; padding-bottom: 80px; }
-        h1 { font-size: 1.5rem; text-align: center; margin-bottom: 24px; }
-        
-        .section-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .section-title { font-size: 1.25rem; font-weight: 600; margin-top: 0; margin-bottom: 16px; }
-        label { display: block; font-size: 0.9rem; font-weight: 500; margin-bottom: 8px; margin-top: 16px; color: #475569;}
-        
-        .score-group { display: flex; gap: 8px; margin-bottom: 16px; }
-        .score-btn { flex: 1; padding: 10px; border: 1px solid var(--border); background: var(--bg); border-radius: 8px; font-size: 1rem; cursor: pointer; transition: 0.2s ease;}
-        .score-btn.active { background: var(--primary); color: white; border-color: var(--primary); font-weight: bold;}
-        
-        textarea { width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 1rem; resize: vertical; min-height: 80px; }
-        input[type="file"] { margin-top: 8px; width: 100%; font-size: 0.9rem;}
-        
-        .image-preview { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
-        .image-preview img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); }
-        
-        .save-btn { display: block; background: var(--primary); color: white; border: none; padding: 16px; font-size: 1.1rem; font-weight: bold; border-radius: 12px; position: fixed; bottom: 16px; left: 16px; right: 16px; width: calc(100% - 32px); box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer;}
+        :root { --primary: #000; --bg: #f4f4f5; --card: #fff; --text: #18181b; --border: #e4e4e7; }
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); padding: 16px; padding-bottom: 90px; margin: 0; }
+        .section-card { background: var(--card); padding: 16px; border-radius: 12px; margin-bottom: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .title { font-size: 1.2rem; font-weight: 700; margin: 0 0 12px 0; border-bottom: 1px solid var(--border); padding-bottom: 8px;}
+        .checklist { list-style: none; padding: 0; margin: 0 0 16px 0; }
+        .checklist li { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; font-size: 1rem;}
+        input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--primary); }
+        .add-item { display: flex; gap: 8px; margin-bottom: 16px; }
+        .add-item input { flex: 1; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem;}
+        .add-item button { padding: 12px 20px; background: var(--text); color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;}
+        .photo-upload { margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--border);}
+        input[type="file"] { font-size: 0.9rem; margin-top: 8px; }
+        .gallery { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+        .gallery img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); }
+        .notes { width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid var(--border); border-radius: 8px; min-height: 80px; font-family: inherit; font-size: 1rem;}
     </style>
 </head>
 <body>
-
-    <h1>Tonstall Road Inspection</h1>
-    <div id="app-container"></div>
-    <button class="save-btn" onclick="alert('Inspection complete! Note: Local saves can be added via localStorage.')">Save Inspection</button>
-
+    <div id="app"></div>
     <script>
-        const categories = [
-            "Exterior & Roof", 
-            "Living Area", 
-            "Kitchen", 
-            "Bedrooms", 
-            "Bathrooms", 
-            "Plumbing, Heating & Electrics"
-        ];
-
-        const container = document.getElementById('app-container');
+        const categories = ["Exterior & Roof", "Living Area", "Kitchen", "Bathrooms", "Bedrooms", "Plumbing & Heating"];
+        const app = document.getElementById('app');
 
         categories.forEach((cat, index) => {
-            const card = document.createElement('div');
-            card.className = 'section-card';
+            const defaultItems = ["Check water pressure", "Check window seals", "Check for damp smells"];
+            const savedItems = JSON.parse(localStorage.getItem('items-' + index)) || defaultItems;
+            const savedNotes = localStorage.getItem('notes-' + index) || "";
             
-            let scoreHTML = '';
-            for(let i=1; i<=5; i++) {
-                scoreHTML += `<button type="button" class="score-btn" onclick="selectScore(this, ${index})">${i}</button>`;
-            }
+            let listHTML = savedItems.map(item => 
+                '<li><input type="checkbox" onchange="saveData()"> <span>' + item + '</span></li>'
+            ).join('');
 
-            card.innerHTML = `
-                <h2 class="section-title">${cat}</h2>
-                
-                <label>Condition Score (1 = Poor, 5 = Excellent)</label>
-                <div class="score-group" id="score-group-${index}">
-                    ${scoreHTML}
+            const section = document.createElement('div');
+            section.className = 'section-card';
+            section.innerHTML = `
+                <h2 class="title">${cat}</h2>
+                <ul class="checklist" id="list-${index}">${listHTML}</ul>
+                <div class="add-item">
+                    <input type="text" id="input-${index}" placeholder="Add custom check...">
+                    <button onclick="addItem(${index})">Add</button>
                 </div>
-
-                <label>Notes & Observations</label>
-                <textarea placeholder="e.g., Damp smell near window, good water pressure..."></textarea>
-
-                <label>Upload Photos</label>
-                <input type="file" accept="image/*" multiple onchange="handleFiles(this, ${index})">
-                <div class="image-preview" id="preview-${index}"></div>
+                <textarea class="notes" id="notes-${index}" placeholder="Write general notes here..." oninput="saveData()">${savedNotes}</textarea>
+                <div class="photo-upload">
+                    <strong>Upload Photos</strong><br>
+                    <input type="file" accept="image/*" multiple onchange="handlePhotos(this, ${index})">
+                    <div class="gallery" id="gallery-${index}"></div>
+                </div>
             `;
-            container.appendChild(card);
+            app.appendChild(section);
         });
 
-        function selectScore(btn, groupIndex) {
-            const group = document.getElementById(`score-group-${groupIndex}`);
-            const buttons = group.getElementsByClassName('score-btn');
-            for(let b of buttons) { b.classList.remove('active'); }
-            btn.classList.add('active');
+        function addItem(index) {
+            const input = document.getElementById('input-' + index);
+            if (!input.value) return;
+            const ul = document.getElementById('list-' + index);
+            ul.insertAdjacentHTML('beforeend', '<li><input type="checkbox" onchange="saveData()"> <span>' + input.value + '</span></li>');
+            input.value = '';
+            saveData();
         }
 
-        function handleFiles(input, index) {
-            const previewContainer = document.getElementById(`preview-${index}`);
-            previewContainer.innerHTML = ''; 
-            
+        function handlePhotos(input, index) {
+            const gallery = document.getElementById('gallery-' + index);
             Array.from(input.files).forEach(file => {
-                if (file.type.startsWith('image/')) {
-                    const img = document.createElement('img');
-                    img.src = URL.createObjectURL(file);
-                    img.onload = () => URL.revokeObjectURL(img.src); 
-                    previewContainer.appendChild(img);
-                }
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                gallery.appendChild(img);
+            });
+        }
+
+        function saveData() {
+            categories.forEach((_, index) => {
+                const items = Array.from(document.getElementById('list-' + index).querySelectorAll('span')).map(span => span.textContent);
+                localStorage.setItem('items-' + index, JSON.stringify(items));
+                localStorage.setItem('notes-' + index, document.getElementById('notes-' + index).value);
             });
         }
     </script>

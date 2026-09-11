@@ -47,14 +47,15 @@
         .question-label { font-weight: 600; font-size: 15px; margin-top: 24px; display: block; margin-bottom: 8px; line-height: 1.3; }
         
         .footer-buttons { display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; padding-bottom: 40px; gap: 12px; }
-        .btn-export { background: #007AFF; color: white; border: none; padding: 12px 20px; font-weight: bold; font-size: 16px; border-radius: 8px; cursor: pointer; flex: 1; }
+        .btn-export { background: #007AFF; color: white; border: none; padding: 14px 20px; font-weight: bold; font-size: 16px; border-radius: 8px; cursor: pointer; flex: 1; text-align: center; }
         .btn-clear { color: #d32f2f; background: none; border: none; font-weight: bold; font-size: 16px; cursor: pointer; padding: 12px 0; }
 
         @media print {
             body { padding: 0; background: #fff; color: #000; }
             .footer-buttons, input[type="file"], .btn-export, .btn-clear { display: none !important; }
-            input, textarea, select { border: none; background: transparent; padding: 0; font-size: 14px; }
-            textarea { resize: none; }
+            input, select { border: none; background: transparent; padding: 0; font-size: 14px; appearance: none; }
+            textarea { border: none; background: transparent; padding: 0; resize: none; }
+            .address-input { border: none; background: transparent; padding: 0; font-size: 18px; }
         }
     </style>
 </head>
@@ -107,7 +108,7 @@
     <textarea id="offer-notes" placeholder="Target offer, evidence, conditions, timing..."></textarea>
 
     <div class="footer-buttons">
-        <button class="btn-export" onclick="exportPDF()">Export PDF Report</button>
+        <button class="btn-export" onclick="window.print()">Export PDF Report</button>
         <button class="btn-clear" onclick="clearData()">Clear saved data</button>
     </div>
 
@@ -183,7 +184,6 @@
             `);
         });
 
-        // Event listeners for basic fields
         ['prop-address', 'prop-price', 'prop-date', 'prop-notes', 'agent-notes', 'prop-decision', 'offer-notes'].forEach(id => {
             document.getElementById(id).addEventListener('input', saveData);
             document.getElementById(id).addEventListener('change', saveData);
@@ -209,10 +209,6 @@
                     reader.readAsDataURL(file);
                 }
             });
-        }
-
-        function exportPDF() {
-            window.print();
         }
 
         function saveData() {
@@ -282,7 +278,7 @@
             if(data.galleries) {
                 Object.keys(data.galleries).forEach(id => {
                     const g = document.getElementById(`gallery-${id}`);
-                    if(g) g.innerHTML = data.galleries[id];
+                    if(g && data.galleries[id]) g.innerHTML = data.galleries[id];
                 });
             }
 
